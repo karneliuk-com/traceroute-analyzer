@@ -1,0 +1,20 @@
+---
+# Amount of possible ICMP paths
+ecmp: 4
+
+# Amount of probes sent per one path
+probes: 10
+
+# External data sources
+datasources:
+  geo:
+    url: http://api.ipapi.com
+    token: 
+  isp:
+    url: https://peeringdb.com/api
+
+# Saved results
+result:
+  file_map: ./trace_map.html
+  file_asn: ./trace_isp.html
+...
