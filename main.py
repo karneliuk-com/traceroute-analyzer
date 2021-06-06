@@ -13,6 +13,7 @@ import bin.functions as bf
 
 # Variables
 config_file = "./config.yml"
+config_ext = "./config_ext.yml"
 destination = ("google.com", "ipv6")
 cache_path = "./.cache"
 
@@ -24,6 +25,13 @@ if __name__ == "__main__":
 
     except:
         sys.exit(f"Can't open the cofniguration file {config_file}.")
+
+    try:
+        new_config = yaml.load(open(config_ext, "r").read(), Loader=yaml.Loader)
+        config = {**config, **new_config}
+
+    except:
+        print("Config isn't augmented with extra vars")
 
     # Checking cache folder
     if not os.path.exists(cache_path):
@@ -39,7 +47,7 @@ if __name__ == "__main__":
     topology = bf.build_graph(traceroute)
 
     # Build map
-#    bf.build_map(traceroute, config)
+    bf.build_map(topology, config)
 
     # Build trace
-    bf.build_isp2(destination, topology, config)
+    bf.build_isp(destination, topology, config)
