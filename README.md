@@ -10,6 +10,9 @@ This tool intents to help the network engineers (or anyone else) to analyze the 
 - Map showing the geographical IP distribution (assuming that the information in Geo IP database is accurate.)
 
 ## Release notes
+Version `0.1.1`:
+- Rebuild and simplifcaition
+
 Version `0.1.0`:
 - First release
 

@@ -13,7 +13,7 @@ import bin.functions as bf
 
 # Variables
 config_file = "./config.yml"
-destination = ("yandex.ru", "ipv6")
+destination = ("google.com", "ipv6")
 cache_path = "./.cache"
 
 # Body
@@ -30,13 +30,16 @@ if __name__ == "__main__":
         os.mkdir(cache_path) 
         
     # Geting hops
-    traceroute = bf.get_path(*destination)
+    traceroute = bf.get_path(config ,*destination)
 
-    # Augmenting data
+    # Augmenting data with info from external sources
     traceroute = bf.augment_data(traceroute, config, cache_path)
 
+    # Build network graph
+    topology = bf.build_graph(traceroute)
+
     # Build map
-    bf.build_map(traceroute, config)
+#    bf.build_map(traceroute, config)
 
     # Build trace
-    bf.build_isp(destination, traceroute, config)
+    bf.build_isp2(destination, topology, config)
