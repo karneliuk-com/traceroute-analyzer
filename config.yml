@@ -9,7 +9,7 @@ probes: 20
 datasources:
   geo:
     url: http://api.ipapi.com
-    token: d78d6b6b386307fc69943f49991bf68d
+    token: a
   isp:
     url: https://peeringdb.com/api
 
