@@ -89,7 +89,7 @@ def augment_data(mtr_result: dict, geo_config: dict, cache_folder: str) -> dict:
         else:
             local_cache = {}
 
-        for run in tqdm(result, desc=f"Augnenting info", colour="blue"):
+        for run in tqdm(result, desc=f"Augnenting {datasource_key} info", colour="blue"):
             # Adding start node
             if run["report"]["hubs"][0]["count"] != "0":
                 my_ip = requests.get(url="https://api.myip.com")
@@ -163,7 +163,7 @@ def build_graph(mtr_result: list) -> networkx.DiGraph():
                 isp_name = he["isp"]["name"] if he["isp"] else "Unknown ISP"
                 asn = re.sub(r'AS', r'', he['ASN'])
 
-                flag = f"{he['geo']['location']['country_flag_emoji']}" if "geo" in he and "location" in he["geo"] and "country_flag_emoji" in he["geo"]["location"] else "❓"
+                flag = f"{he['geo']['location']['country_flag_emoji']}" if "geo" in he and "location" in he["geo"] and "country_flag_emoji" in he["geo"]["location"] and he["geo"]["location"]["country_flag_emoji"] else "❓"
 
                 title = f"ISP: {isp_name}<br>ASN: {asn}<br>IP: {he['host']}<br>{flag}"
 
@@ -208,9 +208,7 @@ def build_map(G: networkx.DiGraph(), geo_config: dict) -> None:
     m = folium.Map()
 
     for ne in G.nodes.data():
-        if "all_data" in ne[1] and "geo" in ne[1]["all_data"] and "latitude" in ne[1]["all_data"]["geo"] and "longitude" in ne[1]["all_data"]["geo"]:
-            isp_name = ne[1]["all_data"]["isp"]["name"] if ne[1]["all_data"]["isp"] else "Unknown ISP"
-
+        if "all_data" in ne[1] and "geo" in ne[1]["all_data"] and "latitude" in ne[1]["all_data"]["geo"] and "longitude" in ne[1]["all_data"]["geo"] and ne[1]["all_data"]["geo"]["latitude"] and ne[1]["all_data"]["geo"]["longitude"]:
             if "nt" in ne[1] and ne[1]["nt"] == "start":
                 color="blue"
             elif "nt" in ne[1] and ne[1]["nt"] == "finish":
@@ -220,16 +218,17 @@ def build_map(G: networkx.DiGraph(), geo_config: dict) -> None:
 
             folium.Marker(
                 location=[ne[1]["all_data"]["geo"]["latitude"], ne[1]["all_data"]["geo"]["longitude"]],
-                popup=f"Hop: {ne[1]['all_data']['count']}<br>IP: {ne[1]['all_data']['host']}<br>Country: {ne[1]['all_data']['geo']['country_name']}<br>City: {ne[1]['all_data']['geo']['city']}<br>ASN: {re.sub('AS', '', ne[1]['all_data']['ASN'])}<br>ISP: {isp_name}",
+                popup=f"Hop: {ne[1]['all_data']['count']}<br>{ne[1]['title']}",
                 icon=folium.Icon(color=color)
             ).add_to(m)
 
     for ee in tqdm(G.edges.data(), desc=f"Drawing the map", colour="blue"):
         if "all_data" in G.nodes[ee[0]] and "geo" in G.nodes[ee[0]]["all_data"] and G.nodes[ee[0]]["all_data"]["geo"] and "all_data" in G.nodes[ee[1]] and "geo" in G.nodes[ee[1]]["all_data"] and G.nodes[ee[1]]["all_data"]["geo"]:
-            folium.PolyLine(
-                locations=[(G.nodes[ee[0]]["all_data"]["geo"]["latitude"], G.nodes[ee[0]]["all_data"]["geo"]["longitude"]),(G.nodes[ee[1]]["all_data"]["geo"]["latitude"], G.nodes[ee[1]]["all_data"]["geo"]["longitude"])],
-                popup=f"Hop {G.nodes[ee[0]]['all_data']['count']} -> Hop {G.nodes[ee[1]]['all_data']['count']}",
-                color="red", weight=1.5
-            ).add_to(m)
+            if "latitude" in G.nodes[ee[0]]["all_data"]["geo"] and G.nodes[ee[0]]["all_data"]["geo"]["latitude"] and "longitude" in G.nodes[ee[0]]["all_data"]["geo"] and G.nodes[ee[0]]["all_data"]["geo"]["longitude"] and "latitude" in G.nodes[ee[1]]["all_data"]["geo"] and G.nodes[ee[1]]["all_data"]["geo"]["latitude"] and "longitude" in G.nodes[ee[1]]["all_data"]["geo"] and G.nodes[ee[1]]["all_data"]["geo"]["longitude"]:
+                folium.PolyLine(
+                    locations=[(G.nodes[ee[0]]["all_data"]["geo"]["latitude"], G.nodes[ee[0]]["all_data"]["geo"]["longitude"]),(G.nodes[ee[1]]["all_data"]["geo"]["latitude"], G.nodes[ee[1]]["all_data"]["geo"]["longitude"])],
+                    popup=f"Loss: {G.nodes[ee[1]]['all_data']['Loss%']}%<br>Latency: {G.nodes[ee[1]]['all_data']['Avg']} ms",
+                    color="red", weight=1.5
+                ).add_to(m)
 
     m.save(geo_config["result"]["file_map"])

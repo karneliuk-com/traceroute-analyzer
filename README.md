@@ -18,6 +18,12 @@ Tool was tested for Python 3.7, 3.8 and 3.9 versions.
 - Map showing the geographical IP distribution (assuming that the information in Geo IP database is accurate.)
 
 ## Release notes
+Version `0.2.2`:
+- Minor bug fixing
+
+Version `0.2.2`:
+- Minor upgrade
+
 Version `0.2.1`:
 - Rebuild of network topology function
 
